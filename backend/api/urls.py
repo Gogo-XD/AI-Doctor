@@ -1,9 +1,8 @@
+# urls.py
 from django.urls import path, include
-from .views import ChatView
-
+from .views import UserProfile
 
 urlpatterns = [
-    path("chats/", ChatView.as_view(), name="chats"),
-    path("messenger/", include('messenger.urls'))
-    # Add other endpoints (like delete) as needed.
+    path('user/profile/', UserProfile.as_view(), name='user_home'),
+    path('messaging/', include('messaging.urls'))
 ]
