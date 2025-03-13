@@ -1,9 +1,20 @@
-import Form from "../components/Form";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
+
+  const handleDoctorButton = () => {
+    navigate("/register/register-doctor");
+  };
+
+  const handlePatientButton = () => {
+    navigate("/register/register-patient");
+  };
+
   return (
     <>
-      <Form route="/api/user/register/" method="register"></Form>
+      <button onClick={handleDoctorButton}>Doctor</button>
+      <button onClick={handlePatientButton}>Patient</button>
     </>
   );
 }

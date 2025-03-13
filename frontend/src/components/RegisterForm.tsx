@@ -1,37 +1,40 @@
 import { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 import "../styles/Form.css";
 
 interface FormProps {
   route: string;
-  method: "login" | "register";
+  method: "doctor" | "patient";
 }
 
 function Form({ route, method }: FormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   // const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  const name = method === "login" ? "Login" : "Register";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     // setLoading(true);
     e.preventDefault();
 
+    if (password != password2) {
+      alert("Passwords must match!");
+      return;
+    }
+
+    console.log(route);
+
     try {
-      const res = await api.post(route, { username, password });
-      if (method === "login") {
-        localStorage.setItem(ACCESS_TOKEN, res.data.access);
-        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
-        navigate("/");
-      } else {
-        navigate("/login");
-      }
+      await api.post(route, {
+        username: username,
+        password: password,
+        password2: password2,
+      });
+      navigate("/login");
     } catch (error) {
       alert(error);
     }
@@ -42,7 +45,7 @@ function Form({ route, method }: FormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="form-container">
-      <h1>{name}</h1>
+      <h1>Register as {method}</h1>
       <input
         className="form-input"
         type="text"
@@ -57,8 +60,15 @@ function Form({ route, method }: FormProps) {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
       />
+      <input
+        className="form-input"
+        type="password"
+        value={password2}
+        onChange={(e) => setPassword2(e.target.value)}
+        placeholder="Retype Password"
+      />
       <button className="form-button" type="submit">
-        {name}
+        Register as {method}
       </button>
     </form>
   );

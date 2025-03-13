@@ -1,78 +1,29 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api";
+import DoctorHome from "./doctor/DoctorHome";
+import PatientHome from "./patient/PatientHome";
 
 function Home() {
-  const [inputType, setInputType] = useState("text"); // "text" or "audio"
-  const [textInput, setTextInput] = useState("");
-  const [response, setResponse] = useState("");
+  const [homepage, setHomepage] = useState("");
+  const navigate = useNavigate();
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputType === "text") {
-      try {
-        const res = await api.post("/api/messenger/", {
-          input_type: "text",
-          text: textInput,
-        });
-        setResponse(res.data.response);
-      } catch (error) {
-        alert("Error sending text: " + error);
-      }
-    }
+  const getHomePage = async () => {
+    const res = await api.get("api/user/profile/");
+    setHomepage(res.data.role);
   };
 
-  return (
-    <div>
-      <div>
-        <button onClick={() => setInputType("text")}>Text Input</button>
-        <button onClick={() => setInputType("audio")}>Audio Input</button>
-      </div>
+  useEffect(() => {
+    getHomePage();
+  });
 
-      {inputType === "text" && (
-        <form onSubmit={handleSend}>
-          <input
-            type="text"
-            value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            placeholder="Type your message..."
-          />
-          <button type="submit">Send</button>
-        </form>
-      )}
-
-      {inputType === "audio" && (
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById(
-              "audioInput"
-            ) as HTMLInputElement;
-            if (fileInput && fileInput.files && fileInput.files.length > 0) {
-              const formData = new FormData();
-              formData.append("input_type", "audio");
-              formData.append("audio", fileInput.files[0]);
-              try {
-                const res = await api.post("/api/messenger/", formData, {
-                  headers: { "Content-Type": "multipart/form-data" },
-                });
-                setResponse(res.data.response);
-              } catch (error) {
-                alert("Error sending audio: " + error);
-              }
-            }
-          }}
-        >
-          <input id="audioInput" type="file" accept="audio/*" />
-          <button type="submit">Send Audio</button>
-        </form>
-      )}
-
-      <div className="chatbox">
-        <h3>Response:</h3>
-        <p>{response}</p>
-      </div>
-    </div>
-  );
+  if (homepage === "doctor") {
+    return <DoctorHome />;
+  } else if (homepage === "patient") {
+    return <PatientHome />;
+  } else if (homepage === "unknown") {
+    alert("Unrecognized Account");
+    navigate("/login");
+  }
 }
-
 export default Home;
